@@ -4,7 +4,7 @@ DROP DATABASE gamestatsdb;
 USE lab_1;
 SHOW DATABASES;
 
--- Some simple querries to view stuff
+-- Some simple queries to view stuff
 SELECT * FROM matches;
 SELECT * FROM playermatchstats;
 SELECT * FROM players;
