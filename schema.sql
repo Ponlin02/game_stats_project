@@ -1,0 +1,72 @@
+-- Create that database if it doesnt already exist!
+CREATE DATABASE IF NOT EXISTS gamestatsdb;
+
+-- Select the database so that we use it
+USE gamestatsdb;
+
+-- ###############
+-- Table "Players"
+-- ###############
+CREATE TABLE Players (
+	PLayerID INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL
+    -- not containing kills and stuff because we can calculate it later. :D
+);
+
+-- #############
+-- Table "Teams"
+-- #############
+CREATE TABLE Teams (
+	TeamID INT AUTO_INCREMENT PRIMARY KEY,
+    TeamName VARCHAR(100) NOT NULL
+);
+
+-- ##########################################################
+-- Table "TeamMembers"
+-- Many-to-many relationship between Teams and Players
+-- Each team has 5 members (5v5 games) not less unfortunatley
+-- ##########################################################
+CREATE TABLE TeamMembers (
+	TeamID int,
+    PlayerID int,
+    PRIMARY KEY (TeamID, PlayerID),
+    FOREIGN KEY (TeamID) REFERENCES Teams(TeamID) ON DELETE CASCADE,
+    FOREIGN KEY (PlayerID) REFERENCES Players(PlayerID) ON DELETE CASCADE
+    -- "Cascade" means that the row will be deleted to avoid "ghost" references!
+);
+
+-- ##########################
+-- Table "Matches"
+-- Match info between 2 teams
+-- ##########################
+CREATE TABLE Matches (
+	MatchID INT AUTO_INCREMENT PRIMARY KEY,
+    Team1ID INT NOT NULL,
+    Team2ID INT NOT NULL,
+    WinningTeamID INT NOT NULL,
+    MatchDate DATE NOT NULL,
+    
+    FOREIGN KEY (Team1ID) REFERENCES Teams(TeamID),
+    FOREIGN KEY (Team2ID) REFERENCES Teams(TeamID),
+    FOREIGN KEY (WinningTeamID) REFERENCES Teams(TeamID)
+);
+
+-- ###############################################
+-- Table "PlayerMatchStats"
+-- Individual performance from a player in a match
+-- Kills, deaths, assists?? 
+-- what do you think about assists Emil?
+-- ###############################################
+CREATE TABLE PlayerMatchStats (
+	MatchID INT,
+    PlayerID INT,
+    TeamID INT,
+    Kills INT DEFAULT 0,
+    Deaths INT DEFAULT 0,
+    Assists INT DEFAULT 0, -- Maybe?
+    
+    PRIMARY KEY (MatchID, PlayerID),
+    FOREIGN KEY (MatchID) REFERENCES Matches(MatchID) ON DELETE CASCADE,
+    FOREIGN KEY (PlayerID) REFERENCES Players(PlayerID) ON DELETE CASCADE,
+    FOREIGN KEY (TeamID) REFERENCES Teams(TeamID) ON DELETE CASCADE
+);
