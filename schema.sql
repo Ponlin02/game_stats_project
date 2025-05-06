@@ -72,3 +72,56 @@ CREATE TABLE PlayerMatchStats (
     FOREIGN KEY (PlayerID) REFERENCES Players(PlayerID) ON DELETE CASCADE,
     FOREIGN KEY (TeamID) REFERENCES Teams(TeamID) ON DELETE CASCADE
 );
+
+-- #############################################
+-- Trigger "update_player_stats_after_match"
+-- This trigger updates "wins" and "gmaesplayed"
+-- #############################################
+-- Set delimiter so MySQL doesnt stop at the first semicolon
+DELIMITER &&
+
+-- Create trigger that runs AFTER a new match is inserted 
+CREATE TRIGGER update_player_stats_after_match
+AFTER INSERT ON Matches
+FOR EACH ROW
+BEGIN
+	-- 1. Update GamesPlayed for Players in Team 1
+	UPDATE Players
+    SET GamesPlayed = GamesPlayed + 1
+    WHERE PlayerID IN (
+		SELECT PlayerID
+        FROM TeamMembers
+        WHERE TeamID = NEW.Team1ID
+	);
+    
+    -- 2. Update GamesPlayed for Players in Team 2
+    UPDATE Players
+    SET GamesPlayed = GamesPlayed + 1
+    WHERE PlayerID IN (
+		SELECT PlayerID
+        FROM TeamMembers
+        WHERE TeamID = NEW.Team2ID
+	);
+    
+    -- 3. Update Wins only for players in the WinningTeam
+    UPDATE Players
+    SET Wins = Wins + 1
+    WHERE PlayerID IN (
+		SELECT PlayerID
+        FROM TeamMembers
+        WHERE TeamID = NEW.WinningTeamID
+	);
+END&&
+
+-- Reset the delimiter
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
