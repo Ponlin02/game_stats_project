@@ -9,7 +9,9 @@ USE gamestatsdb;
 -- ###############
 CREATE TABLE Players (
 	PLayerID INT AUTO_INCREMENT PRIMARY KEY,
-    Name VARCHAR(100) NOT NULL
+    Name VARCHAR(100) NOT NULL,
+    Wins INT DEFAULT 0,
+    GamesPlayed INT DEFAULT 0
     -- not containing kills and stuff because we can calculate it later. :D
 );
 
