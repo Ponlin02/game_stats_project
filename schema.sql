@@ -78,7 +78,7 @@ CREATE TABLE PlayerMatchStats (
 -- This trigger updates "wins" and "gmaesplayed"
 -- #############################################
 -- Set delimiter so MySQL doesnt stop at the first semicolon
-DELIMITER &&
+DELIMITER //
 
 -- Create trigger that runs AFTER a new match is inserted 
 CREATE TRIGGER update_player_stats_after_match
@@ -111,9 +111,39 @@ BEGIN
         FROM TeamMembers
         WHERE TeamID = NEW.WinningTeamID
 	);
-END&&
+END //
 
 -- Reset the delimiter
+DELIMITER ;
+
+DELIMITER //
+
+CREATE FUNCTION GetPlayerKDA(p_PlayerID INT)
+RETURNS VARCHAR(255)
+DETERMINISTIC
+BEGIN
+	DECLARE totalKills INT;
+    DECLARE totalDeaths INT;
+    DECLARE totalAssists INT;
+    DECLARE playerName VARCHAR(100);
+    DECLARE result VARCHAR(255);
+    
+    SELECT
+		COALESCE(SUM(Kills), 0),
+        COALESCE(SUM(Deaths), 0),
+        COALESCE(SUM(Assists), 0)
+	INTO totalKills, totalDeaths, totalAssists
+    FROM PlayerMatchStats
+    WHERE PlayerID = p_PlayerID;
+    
+    SELECT Name INTO playerName
+    FROM Players
+    WHERE PlayerID = p_playerID;
+    
+    SET result = CONCAT(playerName, "'s KDA is ", totalKills, '/', totalDeaths, '/', totalAssists);
+    return result;
+END //
+
 DELIMITER ;
 
 
