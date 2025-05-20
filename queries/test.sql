@@ -5,6 +5,7 @@ SELECT * FROM players;
 SELECT * FROM teammembers;
 SELECT * FROM teams;
 
+-- Some test data of us and friends
 INSERT INTO Players (Name) VALUES
 ('Pontus'),
 ('Emil'),
