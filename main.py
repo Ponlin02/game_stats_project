@@ -13,7 +13,7 @@ import mysql.connector
 db = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="jamesbond70",
+    password="",
     database="gamestatsdb"
 )
 cursor = db.cursor(buffered=True)
@@ -112,7 +112,11 @@ def winrate_between_two_players():
     
     messagebox.showinfo("Resultat", message)
 
-
+def show_matches():
+    cursor.execute("SELECT * FROM Matches")
+    matches = cursor.fetchall()
+    output = "\n".join([f"{m[0]} - {m[1]} - {m[2]} - {m[3]} - {m[4]}" for m in matches])
+    messagebox.showinfo("Matcher", output)
 
 def create_match():
     try:
@@ -157,9 +161,9 @@ def insert_player_gamestats(match_id, team1_id, team2_id):
         cursor.execute("SELECT name FROM Players WHERE PlayerID = %s", (players[0],))
         name = cursor.fetchone()[0]
 
-        kills = simpledialog.askinteger(name, "Kills:")
-        deaths = simpledialog.askinteger(name, "Deaths:")
-        assists = simpledialog.askinteger(name, "Assists:")
+        kills = simpledialog.askinteger("Player Stats", f"Enter kills for {name}:")
+        deaths = simpledialog.askinteger("Player Stats", f"Enter deaths for {name}:")
+        assists = simpledialog.askinteger("Player Stats", f"Enter assists for {name}:")
         
         query = """
         INSERT INTO PlayerMatchStats (MatchID, PlayerID, TeamID, Kills, Deaths, Assists)
@@ -200,12 +204,13 @@ def exit_program():
     root.destroy()
 
 # Buttons
-ttk.Button(root, text="Show Players", command=show_players).pack(pady=5)
+tk.Button(root, text="Show Players", command=show_players).pack(pady=5)
 tk.Button(root, text="Add Player", command=add_player).pack(pady=5)
 tk.Button(root, text="Show Player KDA", command=get_player_kda).pack(pady=5)
 tk.Button(root, text="Create Team", command=create_team).pack(pady=5)
 tk.Button(root, text="Show Teams", command=show_teams).pack(pady=5)
 tk.Button(root, text="Show two players common winrate", command=winrate_between_two_players).pack(pady=5)
+tk.Button(root, text="Show matches", command=show_matches).pack(pady=5)
 tk.Button(root, text="Create Game", command=create_match).pack(pady=5)
 tk.Button(root, text="Exit", command=exit_program).pack(pady=5)
 
