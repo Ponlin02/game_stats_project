@@ -7,7 +7,7 @@ import mysql.connector
 db = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="",
+    password="bruhmoment",
     database="gamestatsdb"
 )
 cursor = db.cursor()
@@ -90,6 +90,12 @@ def winrate_between_two_players():
         message = "Inga matcher tillsammans"
     
     messagebox.showinfo("Resultat", message)
+
+def show_matches():
+    cursor.execute("SELECT * FROM Matches")
+    matches = cursor.fetchall()
+    output = "\n".join([f"{m[0]} - {m[1]} - {m[2]} - {m[3]} - {m[4]}" for m in matches])
+    messagebox.showinfo("Matcher", output)
 
 def create_match():
     try:
@@ -184,7 +190,8 @@ tk.Button(root, text="Visa Spelare", command=show_players).pack(pady=5)
 tk.Button(root, text="Skapa Lag", command=create_team).pack(pady=5)
 tk.Button(root, text="Visa Lag", command=show_teams).pack(pady=5)
 tk.Button(root, text="Visa Winrate Mellan Två Spelare", command=winrate_between_two_players).pack(pady=5)
-tk.Button(root, text="Create match", command=create_match).pack(pady=5)
+tk.Button(root, text="Visa matcher", command=show_matches).pack(pady=5)
+tk.Button(root, text="Skapa match", command=create_match).pack(pady=5)
 tk.Button(root, text="Spelar KDA", command=get_player_kda).pack(pady=5)
 tk.Button(root, text="Avsluta", command=exit_program).pack(pady=5)
 
