@@ -1,27 +1,46 @@
 import tkinter as tk
-from tkinter import messagebox, simpledialog
-import datetime
+from tkinter import messagebox, simpledialog, ttk
+
+#import customtkinter
+
+#ustomtkinter.set_apperance_mode("dark")
+
+
 
 # Your database connection
 import mysql.connector
 db = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="bruhmoment",
+    password="jamesbond70",
     database="gamestatsdb"
 )
-cursor = db.cursor()
+cursor = db.cursor(buffered=True)
 
 # Main window setup
 root = tk.Tk()
 root.title("Spelar Databas Program")
 root.geometry("400x400")
 
+style = ttk.Style()
+
+style.theme_use("classic")
+
+style.configure('Custom.TButton',
+                font=('Helvetica', 12, 'bold'),
+                foreground='green',
+                background='blue',
+                padding=10)
+
 def show_players():
     cursor.execute("SELECT * FROM Players")
     players = cursor.fetchall()
     output = "\n".join([f"{p[0]} - {p[1]}" for p in players])
     messagebox.showinfo("Spelare", output)
+
+def add_player():
+    player_name = simpledialog.askstring("Input", "Ange Spelare:")
+    cursor.execute("INSERT INTO Players (name) VALUES (%s)", (player_name,))
 
 def create_team():
     team_name = simpledialog.askstring("Input", "Ange namn på laget:")
@@ -58,8 +77,9 @@ def winrate_between_two_players():
     cursor.execute("SELECT * FROM Players")
     players = cursor.fetchall()
     player_text = "\n".join([f"{p[0]} - {p[1]}" for p in players])
+    
     messagebox.showinfo("Spelare", player_text)
-
+    
     p1 = simpledialog.askinteger("Input", "Ange första spelare ID:")
     p2 = simpledialog.askinteger("Input", "Ange andra spelare ID:")
 
@@ -91,108 +111,49 @@ def winrate_between_two_players():
     
     messagebox.showinfo("Resultat", message)
 
-def show_matches():
-    cursor.execute("SELECT * FROM Matches")
-    matches = cursor.fetchall()
-    output = "\n".join([f"{m[0]} - {m[1]} - {m[2]} - {m[3]} - {m[4]}" for m in matches])
-    messagebox.showinfo("Matcher", output)
-
-def create_match():
-    try:
-        team1_id = simpledialog.askinteger("Input", "Enter Team 1 ID:")
-        team2_id = simpledialog.askinteger("Input", "Enter Team 2 ID:")
-        winner_id = simpledialog.askinteger("Input", "Enter winning team ID:")
-
-        if None in (team1_id, team2_id, winner_id):
-            messagebox.showwarning("Cancelled", "Match creation cancelled!")
-            return
-        
-        # Get the current date for the matches
-        match_date = datetime.date.today()
-
-        insert_query = """
-        INSERT INTO Matches (Team1ID, Team2ID, WinningTeamID, MatchDate)
-        VALUES (%s, %s, %s, %s)
-        """
-
-        cursor.execute(insert_query, (team1_id, team2_id, winner_id, match_date))
-        db.commit()
-        match_id = cursor.fetchlastrow()
-        print(match_id)
-        insert_player_gamestats(team1_id, team2_id)
-        
-        messagebox.showinfo("Success", "Match created successfully!")
-    
-    except mysql.connector.Error as error:
-        messagebox.showerror("Database Error", f"An error occured: {error}")
-
-def insert_player_gamestats(team1, team2):
+def insert_player_gamestats():
     cursor.execute("SELECT * FROM Matches")
     matches = cursor.fetchall()
     output = "\n".join([f"{m[0]} - {m[1]} - {m[2]} - {m[3]} - {m[4]}" for m in matches])
     messagebox.showinfo("Matcher", output)
 
     matchid = simpledialog.askinteger("Input", "MatchID:")
-    #cursor.execute("SELECT Team1ID, Team2ID FROM Matches WHERE MatchID = %s", (matchid,))
-    #teams = cursor.fetchall()
+    cursor.execute("SELECT Team1ID, Team2ID FROM Matches WHERE MatchID = %s", (matchid,))
+    teams = cursor.fetchall()
         
-    cursor.execute("SELECT playerID FROM TeamMembers WHERE TeamID = %s OR TeamID = %s", (team1, team2))
+    cursor.execute("SELECT playerID FROM TeamMembers WHERE TeamID = %s OR TeamID = %s", (teams[0][0], teams[0][1]))
     count = 0
     for players in cursor.fetchall():  
-          
-        kills = simpledialog.askinteger("Input", "Kills:")
-        deaths = simpledialog.askinteger("Input", "Deaths:")
-        assists = simpledialog.askinteger("Input", "Assists:")
+
+        cursor.execute("SELECT name FROM Players WHERE PlayerID = %s", (players[0],))
+        name = cursor.fetchone()[0]
+
+        kills = simpledialog.askinteger(name, "Kills:")
+        deaths = simpledialog.askinteger(name, "Deaths:")
+        assists = simpledialog.askinteger(name, "Assists:")
         
         query = """
         INSERT INTO PlayerMatchStats (MatchID, PlayerID, TeamID, Kills, Deaths, Assists)
         VALUES (%s, %s, %s, %s, %s, %s)
         """
         if count < 5:
-            cursor.execute(query, (matchid, players[0], team1, kills, deaths, assists))
+            cursor.execute(query, (matchid, players[0], teams[0][0], kills, deaths, assists))
         else:
-            cursor.execute(query, (matchid, players[0], team2, kills, deaths, assists))
+            cursor.execute(query, (matchid, players[0], teams[0][1], kills, deaths, assists))
             
         count += 1
         db.commit()
 
-def get_player_kda():
-    try:
-        cursor.execute("SELECT * FROM Players")
-        players = cursor.fetchall()
-        player_text = "\n".join([f"{p[0]} - {p[1]}" for p in players])
-        messagebox.showinfo("Spelare", player_text)
-
-        player_id = simpledialog.askinteger("Input", "Ange spelar ID:")
-
-        kda_query = """
-        SELECT GetPlayerKDA(%s)
-        """
-        cursor.execute(kda_query, (player_id,))
-        result = cursor.fetchone()
-
-        if result and result[0]:
-            messagebox.showinfo("Player KDA", result[0])
-        else:
-            messagebox.showinfo("Player KDA", "No data found for this player")
-
-    except mysql.connector.Error as error:
-        messagebox.showerror("Database Error", f"An error occured: {error}")
-
-
 def exit_program():
-    cursor.close()
     root.destroy()
-    db.close()
 
 # Buttons
-tk.Button(root, text="Visa Spelare", command=show_players).pack(pady=5)
+ttk.Button(root, text="Visa Spelare", command=show_players).pack(pady=5)
+tk.Button(root, text="Lägg till spelare", command=add_player).pack(pady=5)
 tk.Button(root, text="Skapa Lag", command=create_team).pack(pady=5)
 tk.Button(root, text="Visa Lag", command=show_teams).pack(pady=5)
 tk.Button(root, text="Visa Winrate Mellan Två Spelare", command=winrate_between_two_players).pack(pady=5)
-tk.Button(root, text="Visa matcher", command=show_matches).pack(pady=5)
-tk.Button(root, text="Skapa match", command=create_match).pack(pady=5)
-tk.Button(root, text="Spelar KDA", command=get_player_kda).pack(pady=5)
+tk.Button(root, text="Registra match historik", command=insert_player_gamestats).pack(pady=5)
 tk.Button(root, text="Avsluta", command=exit_program).pack(pady=5)
 
 # Start GUI loop
