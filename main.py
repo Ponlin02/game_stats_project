@@ -173,12 +173,36 @@ def insert_player_gamestats(match_id, team1_id, team2_id):
         count += 1
         db.commit()
 
+def get_player_kda():
+    try:
+        cursor.execute("SELECT * FROM Players")
+        players = cursor.fetchall()
+        player_text = "\n".join([f"{p[0]} - {p[1]}" for p in players])
+        messagebox.showinfo("Spelare", player_text)
+
+        player_id = simpledialog.askinteger("Input", "Ange spelar ID:")
+
+        kda_query = """
+        SELECT GetPlayerKDA(%s)
+        """
+        cursor.execute(kda_query, (player_id,))
+        result = cursor.fetchone()
+
+        if result and result[0]:
+            messagebox.showinfo("Player KDA", result[0])
+        else:
+            messagebox.showinfo("Player KDA", "No data found for this player")
+
+    except mysql.connector.Error as error:
+        messagebox.showerror("Database Error", f"An error occured: {error}")
+
 def exit_program():
     root.destroy()
 
 # Buttons
 ttk.Button(root, text="Show Players", command=show_players).pack(pady=5)
 tk.Button(root, text="Add Player", command=add_player).pack(pady=5)
+tk.Button(root, text="Show Player KDA", command=get_player_kda).pack(pady=5)
 tk.Button(root, text="Create Team", command=create_team).pack(pady=5)
 tk.Button(root, text="Show Teams", command=show_teams).pack(pady=5)
 tk.Button(root, text="Show two players common winrate", command=winrate_between_two_players).pack(pady=5)
