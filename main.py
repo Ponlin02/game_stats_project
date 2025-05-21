@@ -13,7 +13,7 @@ import mysql.connector
 db = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="",
+    password="bruhmoment",
     database="gamestatsdb"
 )
 cursor = db.cursor(buffered=True)
@@ -120,9 +120,9 @@ def show_matches():
 
 def create_match():
     try:
-        team1_id = simpledialog.askinteger("Input", "Enter Team 1 ID:")
-        team2_id = simpledialog.askinteger("Input", "Enter Team 2 ID:")
-        winner_id = simpledialog.askinteger("Input", "Enter winning team ID:")
+        team1_id = simpledialog.askinteger("Input", "Ange Team 1 ID:")
+        team2_id = simpledialog.askinteger("Input", "Ange Team 2 ID:")
+        winner_id = simpledialog.askinteger("Input", "Ange vinnande team ID:")
 
         if None in (team1_id, team2_id, winner_id):
             messagebox.showwarning("Cancelled", "Match creation cancelled!")
@@ -142,7 +142,7 @@ def create_match():
         print(match_id)
         insert_player_gamestats(match_id, team1_id, team2_id)
         
-        messagebox.showinfo("Success", "Match created successfully!")
+        messagebox.showinfo("Success", "Matchen skapades utan problem!")
     
     except mysql.connector.Error as error:
         messagebox.showerror("Database Error", f"An error occured: {error}")
@@ -161,9 +161,9 @@ def insert_player_gamestats(match_id, team1_id, team2_id):
         cursor.execute("SELECT name FROM Players WHERE PlayerID = %s", (players[0],))
         name = cursor.fetchone()[0]
 
-        kills = simpledialog.askinteger("Player Stats", f"Enter kills for {name}:")
-        deaths = simpledialog.askinteger("Player Stats", f"Enter deaths for {name}:")
-        assists = simpledialog.askinteger("Player Stats", f"Enter assists for {name}:")
+        kills = simpledialog.askinteger("Spelarstatistik", f"Ange kills för {name}:")
+        deaths = simpledialog.askinteger("Spelarstatistik", f"Ange deaths för {name}:")
+        assists = simpledialog.askinteger("Spelarstatistik", f"Ange assists för {name}:")
         
         query = """
         INSERT INTO PlayerMatchStats (MatchID, PlayerID, TeamID, Kills, Deaths, Assists)
@@ -204,15 +204,15 @@ def exit_program():
     root.destroy()
 
 # Buttons
-tk.Button(root, text="Show Players", command=show_players).pack(pady=5)
-tk.Button(root, text="Add Player", command=add_player).pack(pady=5)
-tk.Button(root, text="Show Player KDA", command=get_player_kda).pack(pady=5)
-tk.Button(root, text="Create Team", command=create_team).pack(pady=5)
-tk.Button(root, text="Show Teams", command=show_teams).pack(pady=5)
-tk.Button(root, text="Show two players common winrate", command=winrate_between_two_players).pack(pady=5)
-tk.Button(root, text="Show matches", command=show_matches).pack(pady=5)
-tk.Button(root, text="Create Game", command=create_match).pack(pady=5)
-tk.Button(root, text="Exit", command=exit_program).pack(pady=5)
+tk.Button(root, text="Visa spelare", command=show_players).pack(pady=5)
+tk.Button(root, text="Lägg till spelare", command=add_player).pack(pady=5)
+tk.Button(root, text="Visa spelar KDA", command=get_player_kda).pack(pady=5)
+tk.Button(root, text="Skapa lag", command=create_team).pack(pady=5)
+tk.Button(root, text="Visa lag", command=show_teams).pack(pady=5)
+tk.Button(root, text="Visa gemensam winrate mellan 2 spelare", command=winrate_between_two_players).pack(pady=5)
+tk.Button(root, text="Visa matcher", command=show_matches).pack(pady=5)
+tk.Button(root, text="Skapa match", command=create_match).pack(pady=5)
+tk.Button(root, text="Stäng av", command=exit_program).pack(pady=5)
 
 # Start GUI loop
 root.mainloop()
