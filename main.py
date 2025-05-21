@@ -13,7 +13,7 @@ import mysql.connector
 db = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="bruhmoment",
+    password="",
     database="gamestatsdb"
 )
 cursor = db.cursor(buffered=True)
