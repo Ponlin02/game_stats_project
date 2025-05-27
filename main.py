@@ -166,13 +166,13 @@ def insert_player_gamestats(match_id, team1_id, team2_id):
         assists = simpledialog.askinteger("Spelarstatistik", f"Ange assists för {name}:")
         
         query = """
-        INSERT INTO PlayerMatchStats (MatchID, PlayerID, TeamID, Kills, Deaths, Assists)
-        VALUES (%s, %s, %s, %s, %s, %s)
+        INSERT INTO PlayerMatchStats (MatchID, PlayerID, Kills, Deaths, Assists)
+        VALUES (%s, %s, %s, %s, %s)
         """
         if count < 5:
-            cursor.execute(query, (match_id, players[0], team1_id, kills, deaths, assists))
+            cursor.execute(query, (match_id, players[0], kills, deaths, assists))
         else:
-            cursor.execute(query, (match_id, players[0], team2_id, kills, deaths, assists))
+            cursor.execute(query, (match_id, players[0], kills, deaths, assists))
             
         count += 1
         db.commit()

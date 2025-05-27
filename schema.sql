@@ -62,15 +62,13 @@ CREATE TABLE Matches (
 CREATE TABLE PlayerMatchStats (
 	MatchID INT,
     PlayerID INT,
-    TeamID INT,
     Kills INT DEFAULT 0,
     Deaths INT DEFAULT 0,
     Assists INT DEFAULT 0, -- Maybe?
     
     PRIMARY KEY (MatchID, PlayerID),
     FOREIGN KEY (MatchID) REFERENCES Matches(MatchID) ON DELETE CASCADE,
-    FOREIGN KEY (PlayerID) REFERENCES Players(PlayerID) ON DELETE CASCADE,
-    FOREIGN KEY (TeamID) REFERENCES Teams(TeamID) ON DELETE CASCADE
+    FOREIGN KEY (PlayerID) REFERENCES Players(PlayerID) ON DELETE CASCADE
 );
 
 -- #############################################
