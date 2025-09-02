@@ -200,6 +200,29 @@ def get_player_kda():
     except mysql.connector.Error as error:
         messagebox.showerror("Database Error", f"An error occured: {error}")
 
+def show_player_teams():
+    cursor.execute("SELECT * FROM Players")
+    players = cursor.fetchall()
+    player_text = "\n".join([f"{p[0]} - {p[1]}" for p in players])
+
+    messagebox.showinfo("Spelare", player_text)
+
+    p1 = simpledialog.askinteger("Input", "Ange första spelare ID:")
+
+    insert_query = """
+    SELECT TeamName FROM Teams t
+    JOIN TeamMembers tm ON t.TeamID = tm.TeamID 
+    WHERE tm.PlayerID = %s
+    """
+    
+    cursor.execute(insert_query, (p1,))
+    teams = cursor.fetchall()
+    if teams:
+        output = "\n".join([team[0] for team in teams])  # team[0] eftersom bara TeamName hämtas
+    else:
+        output = "Inga lag hittades för spelaren."
+    messagebox.showinfo("Lag", output)
+
 def exit_program():
     root.destroy()
 
@@ -212,6 +235,7 @@ tk.Button(root, text="Visa lag", command=show_teams).pack(pady=5)
 tk.Button(root, text="Visa gemensam winrate mellan 2 spelare", command=winrate_between_two_players).pack(pady=5)
 tk.Button(root, text="Visa matcher", command=show_matches).pack(pady=5)
 tk.Button(root, text="Skapa match", command=create_match).pack(pady=5)
+tk.Button(root, text="Visa spelare tidigare lag", command=show_player_teams).pack(pady=5)
 tk.Button(root, text="Stäng av", command=exit_program).pack(pady=5)
 
 # Start GUI loop
